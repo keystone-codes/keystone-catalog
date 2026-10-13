@@ -1,0 +1,29 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Install keystonectl
+        run: |
+          KEYSTONECTL="git+https://github.com/keystone-codes/keystonectl@eda184ea8179534f31690322c53366d9947abc29"
+          uv tool install --force "keystonectl@${KEYSTONECTL}"
+          keystonectl --version
+      - run: uv sync
+      - run: keystonectl lint catalog.yaml
+      - run: uv run pytest -q
+      - run: |
+          uv run python scripts/check_refs.py --catalog catalog.yaml \
+            --lint-cmd "keystonectl lint"
