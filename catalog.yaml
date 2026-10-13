@@ -1,0 +1,30 @@
+schema_version: 1
+name: keystone-codes
+packages:
+  file-mcp:
+    source: https://github.com/keystone-codes/file-mcp
+    versions:
+      - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+  minio:
+    kind: resource
+    provides: {kind: s3, version: 1}
+    source: https://github.com/keystone-codes/minio-resource
+    versions:
+      - {version: 1.0.0, ref: v1.0.0}
+  postgres:
+    kind: resource
+    provides: {kind: postgres, version: 1}
+    source: https://github.com/keystone-codes/postgres-resource
+    versions:
+      - {version: 1.0.0, ref: v1.0.0}
+  hello-upstream:
+    source: https://github.com/keystone-codes/hello-upstream-package
+    versions:
+      - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+bundles:
+  minimal:
+    description: >-
+      File transfer for agents: upload/download links via file-mcp. Use your S3
+      or install MinIO from this catalog when needed. More services will join
+      this bundle over time.
+    packages: [file-mcp]
