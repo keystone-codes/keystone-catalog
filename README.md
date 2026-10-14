@@ -2,6 +2,8 @@
 
 Default **Keystone services catalog** for the `keystone-codes` publisher. `keystonectl` uses this repository out of the box; operators can add partner catalogs with `keystonectl catalog add`.
 
+Install the installer: `uv tool install keystonectl` (PyPI, 0.1.0 and later).
+
 ## What this is
 
 The catalog lists installable packages (services and resource providers) and optional **bundles** — curated sets of services installed with one command (`keystonectl bundle install <name>`). Each package entry points at a git repository and a pinned tag; image digests live in the package manifest on that tag, not in this repo.
@@ -25,7 +27,7 @@ Trust model: HTTPS git URLs, immutable package tags, and container images pinned
 
 Changes land through a pull request:
 
-1. The package meets the [Packaging a service](https://github.com/keystone-codes/keystonectl/blob/eda184ea8179534f31690322c53366d9947abc29/docs/packaging-a-service.md#checklist) checklist in `keystonectl`, including `X-Keystone-Identity` and bearer checks (R8).
+1. The package meets the [Packaging a service](https://github.com/keystone-codes/keystonectl/blob/v0.1.0/docs/packaging-a-service.md#checklist) checklist in `keystonectl`, including `X-Keystone-Identity` and bearer checks (R8).
 2. The package repository has an immutable tag `v<version>`; `keystone-service.yaml` on that tag passes `keystonectl lint`.
 3. Container images use `@sha256:…` digests; for `ghcr.io/keystone-codes/*`, the `:X.Y.Z` tag must reference the same digest as the manifest.
 4. The PR adds a `packages.<name>` entry and a `CHANGELOG.md` line; CI (`check.yml`) must pass.
@@ -43,7 +45,7 @@ Changes land through a pull request:
 
 CI on every pull request runs `keystonectl lint` on `catalog.yaml`, unit tests for reference checking, and `scripts/check_refs.py` (git tags, manifest match, image digests). GitHub Actions use pinned action SHAs. Branch protection on `main` should require the `check` workflow (configured by the repository owner).
 
-Package entries pin a `ref` by tag or commit SHA; see [Tag or commit](https://github.com/keystone-codes/keystonectl/blob/eda184ea8179534f31690322c53366d9947abc29/docs/spec/catalog.md#tag-or-commit) in the `keystonectl` catalog spec for the trust difference between the two.
+Package entries pin a `ref` by tag or commit SHA; see [Tag or commit](https://github.com/keystone-codes/keystonectl/blob/v0.1.0/docs/spec/catalog.md#tag-or-commit) in the `keystonectl` catalog spec for the trust difference between the two.
 
 ## Development
 
