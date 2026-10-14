@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Docs: point README and CI at the published `keystonectl` 0.1.0 (PyPI/`v0.1.0` tag) instead of a pinned commit SHA.
+
 ## 1.0.0
 
 - Catalog `keystone-codes` with four packages: `file-mcp`, `hello-upstream`, and resource providers `minio` (s3/v1) and `postgres` (postgres/v1).
