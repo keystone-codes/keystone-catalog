@@ -43,6 +43,8 @@ Changes land through a pull request:
 
 CI on every pull request runs `keystonectl lint` on `catalog.yaml`, unit tests for reference checking, and `scripts/check_refs.py` (git tags, manifest match, image digests). GitHub Actions use pinned action SHAs. Branch protection on `main` should require the `check` workflow (configured by the repository owner).
 
+Package entries pin a `ref` by tag or commit SHA; see [Tag or commit](https://github.com/keystone-codes/keystonectl/blob/eda184ea8179534f31690322c53366d9947abc29/docs/spec/catalog.md#tag-or-commit) in the `keystonectl` catalog spec for the trust difference between the two.
+
 ## Development
 
 ```bash
