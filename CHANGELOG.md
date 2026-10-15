@@ -1,10 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## 1.1.0
 
 - Docs: point README and CI at the published `keystonectl` 0.1.0 (PyPI/`v0.1.0` tag) instead of a pinned commit SHA.
 - `check_refs.py` reads a package's manifest only from its `path`; it no longer falls back to the repository root.
 - If an image reference carries a tag before the digest, `check_refs.py` verifies that tag instead of the package version; this lets several packages share one image.
+- `minio` 1.0.1: images rebuilt with the AGPL-3.0 text at `/licenses` and the license label; new digests.
+- `hello-upstream` 1.0.1: the manifest summary says three tools.
+- `file-mcp` 1.0.1: the manifest no longer calls the published digest a placeholder.
+- Catalog tag `v1.1.0`.
 
 ## 1.0.0
 
