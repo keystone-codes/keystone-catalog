@@ -156,13 +156,22 @@ def _resource_manifest_postgres() -> str:
 
 
 class FakeRunner:
-    def __init__(self, manifests: dict[str, str], *, tag_missing: set[str] | None = None) -> None:
+    def __init__(
+        self,
+        manifests: dict[str, str],
+        *,
+        tag_missing: set[str] | None = None,
+        trees: dict[str, dict[str, str]] | None = None,
+    ) -> None:
         self.manifests = manifests
         self.tag_missing = tag_missing or set()
+        self.trees = trees
         self.inspect_calls: list[str] = []
+        self.calls: list[list[str]] = []
         self.tag_digests: dict[str, str] = {}
 
     def __call__(self, cmd: list[str]) -> tuple[int, str]:
+        self.calls.append(cmd)
         if cmd[:3] == ["git", "ls-remote", "--tags"]:
             ref = cmd[-1]
             source = cmd[-2]
@@ -175,6 +184,13 @@ class FakeRunner:
             dest = Path(cmd[-1])
             source = cmd[-2]
             dest.mkdir(parents=True, exist_ok=True)
+            tree = None if self.trees is None else self.trees.get(source)
+            if tree is not None:
+                for relpath, body in tree.items():
+                    target = dest / relpath
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(body, encoding="utf-8")
+                return 0, ""
             body = self.manifests.get(source, _service_manifest("unknown"))
             (dest / "keystone-service.yaml").write_text(body, encoding="utf-8")
             return 0, ""
@@ -538,3 +554,196 @@ def test_all_errors_listed_not_first_only(tmp_path: Path) -> None:
     code, errors = check_catalog(path, ["lint-fail"], run=runner)
     assert code == 1
     assert len(errors) >= 3
+
+
+def _service_entry(source: str, **extra: object) -> dict:
+    entry: dict = {
+        "source": source,
+        "versions": [
+            {
+                "version": "1.0.0",
+                "ref": "v1.0.0",
+                "keystone_mcp": ">=0.5.0,<2.0",
+            }
+        ],
+    }
+    entry.update(extra)
+    return entry
+
+
+def _catalog_with(packages: dict) -> dict:
+    return {"schema_version": 1, "name": "keystone-codes", "packages": packages}
+
+
+def _lint_paths(runner: FakeRunner) -> list[str]:
+    return [cmd[-1] for cmd in runner.calls if cmd and cmd[0] == "lint-ok"]
+
+
+def test_package_path_reads_subdirectory(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    catalog = _catalog_with(
+        {
+            "atlassian": _service_entry(source, path="packages/a"),
+            "notion": _service_entry(source, path="packages/b"),
+        }
+    )
+    runner = FakeRunner(
+        {},
+        trees={
+            source: {
+                "packages/a/keystone-service.yaml": _service_manifest("atlassian"),
+                "packages/b/keystone-service.yaml": _service_manifest("notion"),
+            }
+        },
+    )
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 0
+    assert errors == []
+    lint_paths = _lint_paths(runner)
+    assert len(lint_paths) == 2
+    assert any(item.endswith("packages/a/keystone-service.yaml") for item in lint_paths)
+    assert any(item.endswith("packages/b/keystone-service.yaml") for item in lint_paths)
+
+
+def test_package_path_does_not_fall_back_to_root(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    catalog = _catalog_with(
+        {"atlassian": _service_entry(source, path="packages/a")}
+    )
+    runner = FakeRunner(
+        {},
+        trees={source: {"keystone-service.yaml": _service_manifest("atlassian")}},
+    )
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 1
+    assert errors == [
+        "atlassian 1.0.0: packages/a/keystone-service.yaml not found at v1.0.0"
+    ]
+    assert _lint_paths(runner) == []
+
+
+def test_package_path_not_a_string(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    catalog = _catalog_with(
+        {
+            "atlassian": _service_entry(
+                source,
+                path=5,
+                versions=[{"version": "1.0.0", "ref": "missing"}],
+            )
+        }
+    )
+    runner = FakeRunner({})
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 1
+    assert errors == ["atlassian: path must be a string"]
+    assert runner.calls == []
+
+
+def test_ref_with_slash(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    catalog = _catalog_with(
+        {
+            "atlassian": _service_entry(
+                source,
+                versions=[
+                    {
+                        "version": "1.0.0",
+                        "ref": "atlassian/v1.0.0",
+                        "keystone_mcp": ">=0.5.0,<2.0",
+                    }
+                ],
+            )
+        }
+    )
+    runner = FakeRunner({source: _service_manifest("atlassian")})
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 0
+    assert errors == []
+    ls_remote = [cmd for cmd in runner.calls if cmd[:3] == ["git", "ls-remote", "--tags"]]
+    assert ls_remote[0][-1] == "refs/tags/atlassian/v1.0.0"
+    clones = [cmd for cmd in runner.calls if cmd[:2] == ["git", "clone"]]
+    branch_at = clones[0].index("--branch")
+    assert clones[0][branch_at + 1] == "atlassian/v1.0.0"
+
+
+def test_image_tag_before_digest_is_verified(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    image = f"ghcr.io/keystone-codes/stdio-box:0.1.0@sha256:{DIGEST_A}"
+    catalog = _catalog_with({"atlassian": _service_entry(source)})
+    runner = FakeRunner({source: _service_manifest("atlassian", image=image)})
+    runner.tag_digests = {
+        "ghcr.io/keystone-codes/stdio-box:0.1.0": f"sha256:{DIGEST_A}",
+    }
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 0
+    assert errors == []
+    assert "ghcr.io/keystone-codes/stdio-box:0.1.0" in runner.inspect_calls
+    assert "ghcr.io/keystone-codes/stdio-box:1.0.0" not in runner.inspect_calls
+
+
+def test_image_tag_before_digest_mismatch_reported(tmp_path: Path) -> None:
+    source = "https://example.com/stdio-box"
+    image = f"ghcr.io/keystone-codes/stdio-box:0.1.0@sha256:{DIGEST_A}"
+    catalog = _catalog_with({"atlassian": _service_entry(source)})
+    runner = FakeRunner({source: _service_manifest("atlassian", image=image)})
+    runner.tag_digests = {
+        "ghcr.io/keystone-codes/stdio-box:0.1.0": f"sha256:{DIGEST_B}",
+    }
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 1
+    assert len(errors) == 1
+    assert "tag 0.1.0" in errors[0]
+    assert f"sha256:{DIGEST_A}" in errors[0]
+
+
+def test_image_without_tag_uses_package_version(tmp_path: Path) -> None:
+    source = "https://example.com/atlassian"
+    image = f"ghcr.io/keystone-codes/atlassian@sha256:{DIGEST_A}"
+    catalog = _catalog_with({"atlassian": _service_entry(source)})
+    runner = FakeRunner({source: _service_manifest("atlassian", image=image)})
+    runner.tag_digests = {
+        "ghcr.io/keystone-codes/atlassian:1.0.0": f"sha256:{DIGEST_A}",
+    }
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 0
+    assert errors == []
+    tag_checks = [item for item in runner.inspect_calls if "@sha256:" not in item]
+    assert tag_checks == ["ghcr.io/keystone-codes/atlassian:1.0.0"]
+
+
+def test_shared_image_tag_checked_once(tmp_path: Path) -> None:
+    image = f"ghcr.io/keystone-codes/stdio-box:0.1.0@sha256:{DIGEST_A}"
+    atlassian = "https://example.com/atlassian"
+    notion = "https://example.com/notion"
+    catalog = _catalog_with(
+        {
+            "atlassian": _service_entry(atlassian),
+            "notion": _service_entry(notion),
+        }
+    )
+    runner = FakeRunner(
+        {
+            atlassian: _service_manifest("atlassian", image=image),
+            notion: _service_manifest("notion", image=image),
+        }
+    )
+    runner.tag_digests = {
+        "ghcr.io/keystone-codes/stdio-box:0.1.0": f"sha256:{DIGEST_A}",
+    }
+    path = _write_catalog(tmp_path, catalog)
+    code, errors = check_catalog(path, ["lint-ok"], run=runner)
+    assert code == 0
+    assert errors == []
+    tag_checks = [
+        item for item in runner.inspect_calls if item == "ghcr.io/keystone-codes/stdio-box:0.1.0"
+    ]
+    assert tag_checks == ["ghcr.io/keystone-codes/stdio-box:0.1.0"]
+    assert "ghcr.io/keystone-codes/stdio-box:1.0.0" not in runner.inspect_calls

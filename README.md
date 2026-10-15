@@ -6,7 +6,7 @@ Install the installer: `uv tool install keystonectl` (PyPI, 0.1.0 and later).
 
 ## What this is
 
-The catalog lists installable packages (services and resource providers) and optional **bundles** — curated sets of services installed with one command (`keystonectl bundle install <name>`). Each package entry points at a git repository and a pinned tag; image digests live in the package manifest on that tag, not in this repo.
+The catalog lists installable packages (services and resource providers) and optional **bundles** — curated sets of services installed with one command (`keystonectl bundle install <name>`). Each package entry points at a git repository and a pinned tag; image digests live in the package manifest on that tag, not in this repo. A package that is not at the repository root sets `path` to the directory that contains its manifest ([Package entry](https://github.com/keystone-codes/keystonectl/blob/v0.1.0/docs/spec/catalog.md#package-entry)).
 
 Trust model: HTTPS git URLs, immutable package tags, and container images pinned by digest. Catalog signing is planned later (see Keystone catalog concept, section 10).
 
@@ -28,8 +28,8 @@ Trust model: HTTPS git URLs, immutable package tags, and container images pinned
 Changes land through a pull request:
 
 1. The package meets the [Packaging a service](https://github.com/keystone-codes/keystonectl/blob/v0.1.0/docs/packaging-a-service.md#checklist) checklist in `keystonectl`, including `X-Keystone-Identity` and bearer checks (R8).
-2. The package repository has an immutable tag `v<version>`; `keystone-service.yaml` on that tag passes `keystonectl lint`.
-3. Container images use `@sha256:…` digests; for `ghcr.io/keystone-codes/*`, the `:X.Y.Z` tag must reference the same digest as the manifest.
+2. The package repository has an immutable tag (`v<version>`; for a repository that holds several packages, each in its own `path`, the tag that releases them — see the package entry's `ref`). `keystone-service.yaml` at `path` on that tag passes `keystonectl lint`.
+3. Container images use `@sha256:…` digests; for `ghcr.io/keystone-codes/*`, the image tag — the one written before `@sha256:` in the image reference, or `:X.Y.Z` of the package version if the reference has no tag — must reference the same digest as the manifest.
 4. The PR adds a `packages.<name>` entry and a `CHANGELOG.md` line; CI (`check.yml`) must pass.
 5. A catalog maintainer reviews and merges.
 
