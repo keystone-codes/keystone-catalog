@@ -18,8 +18,7 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - name: Install keystonectl
         run: |
-          KEYSTONECTL="git+https://github.com/keystone-codes/keystonectl@eda184ea8179534f31690322c53366d9947abc29"
-          uv tool install --force "keystonectl@${KEYSTONECTL}"
+          uv tool install --force "keystonectl==0.1.0"
           keystonectl --version
       - run: uv sync
       - run: keystonectl lint catalog.yaml
