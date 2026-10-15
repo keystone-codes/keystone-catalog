@@ -5,12 +5,14 @@ packages:
     source: https://github.com/keystone-codes/file-mcp
     versions:
       - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.0.1, ref: v1.0.1, keystone_mcp: ">=0.5.0,<2.0"}
   minio:
     kind: resource
     provides: {kind: s3, version: 1}
     source: https://github.com/keystone-codes/minio-resource
     versions:
       - {version: 1.0.0, ref: v1.0.0}
+      - {version: 1.0.1, ref: v1.0.1}
   postgres:
     kind: resource
     provides: {kind: postgres, version: 1}
@@ -21,6 +23,7 @@ packages:
     source: https://github.com/keystone-codes/hello-upstream-package
     versions:
       - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.0.1, ref: v1.0.1, keystone_mcp: ">=0.5.0,<2.0"}
 bundles:
   minimal:
     description: >-
