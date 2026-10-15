@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- New packages `atlassian` (Jira and Confluence) and `notion` (Notion): credential boxes for stdio MCP servers, both from the `stdio-box` repository.
+- Catalog tag `v1.2.0`.
+
 ## 1.1.0
 
 - Docs: point README and CI at the published `keystonectl` 0.1.0 (PyPI/`v0.1.0` tag) instead of a pinned commit SHA.

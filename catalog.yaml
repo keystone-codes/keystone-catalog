@@ -24,6 +24,36 @@ packages:
     versions:
       - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.0.1, ref: v1.0.1, keystone_mcp: ">=0.5.0,<2.0"}
+  atlassian:
+    summary: Jira and Confluence behind Keystone; each person, service or role uses its own account.
+    source: https://github.com/keystone-codes/stdio-box
+    path: packages/atlassian
+    versions:
+      - {version: 1.0.0, ref: atlassian/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+  notion:
+    summary: Notion tools behind Keystone; each person, service or role uses its own account.
+    source: https://github.com/keystone-codes/stdio-box
+    path: packages/notion
+    versions:
+      - {version: 1.0.0, ref: notion/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+  tavily:
+    summary: Tavily search tools (tavily-mcp 0.2.22) behind Keystone; each person, service or role uses its own API key.
+    source: https://github.com/keystone-codes/stdio-box
+    path: packages/tavily
+    versions:
+      - {version: 1.0.0, ref: tavily/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+  yandex-tracker:
+    summary: Yandex Tracker tools (@fractalizer/mcp-server-yandex-tracker 5.1.0) behind Keystone; each person, service or role uses its own account.
+    source: https://github.com/keystone-codes/stdio-box
+    path: packages/yandex-tracker
+    versions:
+      - {version: 1.0.0, ref: yandex-tracker/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
+  yandex-wiki:
+    summary: Yandex Wiki tools (ya-wiki-mcp 0.3.1) behind Keystone; each person, service or role uses its own account.
+    source: https://github.com/keystone-codes/stdio-box
+    path: packages/yandex-wiki
+    versions:
+      - {version: 1.0.0, ref: yandex-wiki/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
 bundles:
   minimal:
     description: >-
