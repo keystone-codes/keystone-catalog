@@ -39,12 +39,21 @@ def _version_str(value: object) -> str:
     return str(value)
 
 
+def _manifest_path(clone_dir: Path, pkg_path: str) -> Path:
+    """Path of the package manifest. `.` and empty mean the clone root."""
+    name = "keystone-service.yaml"
+    if pkg_path in (".", ""):
+        return clone_dir / name
+    return clone_dir / pkg_path / name
+
+
+def _manifest_not_found(pkg: str, version: str, pkg_path: str, ref: str) -> str:
+    relative = _manifest_path(Path("."), pkg_path).as_posix()
+    return f"{pkg} {version}: {relative} not found at {ref}"
+
+
 def _load_manifest(repo_dir: Path, pkg_path: str) -> dict[str, Any]:
-    manifest_path = repo_dir / pkg_path / "keystone-service.yaml"
-    if not manifest_path.is_file():
-        manifest_path = repo_dir / "keystone-service.yaml"
-    if not manifest_path.is_file():
-        raise FileNotFoundError(f"{manifest_path}: keystone-service.yaml not found")
+    manifest_path = _manifest_path(repo_dir, pkg_path)
     document = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(document, dict):
         raise ValueError(f"{manifest_path}: manifest must be a mapping")
@@ -83,8 +92,18 @@ def _check_image_format(role: str, image: str, pkg: str, version: str) -> str | 
     return None
 
 
-def _repo_from_digest_image(image: str) -> str:
-    return image.split("@", 1)[0]
+def _image_name_and_tag(image: str) -> tuple[str, str | None]:
+    """Split a digest reference into repo and the tag written before `@`.
+
+    A colon in the registry host (a port) is not a tag: the tag colon sits
+    after the last slash.
+    """
+    name = image.split("@", 1)[0]
+    slash = name.rfind("/")
+    colon = name.rfind(":")
+    if colon > slash:
+        return name[:colon], name[colon + 1 :]
+    return name, None
 
 
 def _digest_from_image(image: str) -> str:
@@ -112,12 +131,13 @@ def _check_image_exists(
             f"{pkg} {version}: image {image!r} not found in registry ({out.strip()})"
         )
         return errors
-    if KEYSTONE_CODES_GHCR.match(_repo_from_digest_image(image)):
-        repo = _repo_from_digest_image(image)
+    repo, image_tag = _image_name_and_tag(image)
+    if KEYSTONE_CODES_GHCR.match(repo):
         expected = _digest_from_image(image)
+        tag = image_tag if image_tag else version
         errors.extend(
             _verify_keystone_codes_tag(
-                run, repo, version, expected, pkg, version, verified_tags
+                run, repo, tag, expected, pkg, version, verified_tags
             )
         )
     return errors
@@ -210,13 +230,13 @@ def _check_bundles(catalog: dict[str, Any]) -> list[str]:
 def _verify_keystone_codes_tag(
     run: RunFn,
     repo: str,
-    version: str,
+    tag: str,
     expected_digest: str,
     pkg: str,
     version_label: str,
     verified_tags: set[str],
 ) -> list[str]:
-    tag_ref = f"{repo}:{version}"
+    tag_ref = f"{repo}:{tag}"
     if tag_ref in verified_tags:
         return []
     verified_tags.add(tag_ref)
@@ -238,7 +258,7 @@ def _verify_keystone_codes_tag(
     published = tag_out.strip().strip('"')
     if published.lower() != expected_digest.lower():
         return [
-            f"{pkg} {version_label}: tag {version} digest {published} "
+            f"{pkg} {version_label}: tag {tag} digest {published} "
             f"does not match manifest digest {expected_digest}"
         ]
     return []
@@ -273,7 +293,8 @@ def check_catalog(
             continue
         pkg_path = pkg_entry.get("path", ".")
         if not isinstance(pkg_path, str):
-            pkg_path = "."
+            errors.append(f"{pkg_name}: path must be a string")
+            continue
         versions = pkg_entry.get("versions")
         if not isinstance(versions, list):
             continue
@@ -313,6 +334,11 @@ def check_catalog(
                     )
                     continue
 
+                manifest_file = _manifest_path(clone_dir, pkg_path)
+                if not manifest_file.is_file():
+                    errors.append(_manifest_not_found(pkg_name, version, pkg_path, ref))
+                    continue
+
                 try:
                     manifest = _load_manifest(clone_dir, pkg_path)
                 except (OSError, yaml.YAMLError, ValueError) as exc:
@@ -321,9 +347,6 @@ def check_catalog(
 
                 errors.extend(_compare_manifest(manifest, pkg_name, pkg_entry, version_row))
 
-                manifest_file = clone_dir / pkg_path / "keystone-service.yaml"
-                if not manifest_file.is_file():
-                    manifest_file = clone_dir / "keystone-service.yaml"
                 lint_code, lint_out = run([*lint_cmd, str(manifest_file)])
                 if lint_code != 0:
                     detail = lint_out.strip() or f"lint exited with code {lint_code}"
