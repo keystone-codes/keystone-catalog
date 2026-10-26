@@ -46,7 +46,7 @@ Changes land through a pull request:
 - New releases add a row under `packages.<name>.versions`; older rows stay for `service upgrade` and rollback. Remove a version only for a documented security reason, with a CHANGELOG entry.
 - Package tags are never moved or deleted; fixes ship as a new version.
 - Renaming a tool or breaking input schemas requires a new major package version.
-- This catalog repository is tagged `v<major>.<minor>.<patch>`: patch — metadata fixes; minor — new package or version; major — `schema_version` change. `keystonectl` pins a catalog source by tag. Adding a version row for an existing package follows [Releasing a new version](https://github.com/keystone-codes/keystonectl/blob/9160ea4/docs/packaging-a-service.md#releasing-a-new-version) in the `keystonectl` packaging guide.
+- This catalog repository is tagged `v<major>.<minor>.<patch>`: patch — metadata fixes; minor — new package or version; major — `schema_version` change. `keystonectl` pins a catalog source by tag. Adding a version row for an existing package follows [Releasing a new version](https://github.com/keystone-codes/keystonectl/blob/58e36f3/docs/packaging-a-service.md#releasing-a-new-version) in the `keystonectl` packaging guide.
 
 ## Trust
 
