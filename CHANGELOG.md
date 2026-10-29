@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- `file-mcp` 1.0.2: `fastmcp` 4.1.4 and `authlib` 1.9.1 (security fixes); integration tests run in CI.
+- `hello-upstream` 1.0.2: `mcp` 1.30.0 and `certifi` 2026.10.23; reproducible requirements.
+- `minio` 1.0.2: the server runs as uid 10001 (a data volume created by an earlier version is handed over on first start), OS packages updated, the image carries a NOTICE with the MinIO and mc source tags. `minio` 1.0.0 is removed: its images have no license text. An installed 1.0.0 keeps working and can be upgraded.
+- Version `1.1.1` of the five `stdio-box` credential boxes (`atlassian`, `notion`, `tavily`, `yandex-tracker`, `yandex-wiki`): built from `stdio-box` 0.3.1 (`ghcr.io/keystone-codes/stdio-box:0.3.1`, `mcp` 1.30.0, image security updates). `atlassian` and `yandex-wiki` take `fastmcp` security fixes, `notion` moves to `@notionhq/notion-mcp-server` 2.6.0, `tavily` overrides vulnerable transitive npm packages; `yandex-tracker` changes only the image. No credential store migration.
+- Catalog tag `v1.4.0`.
+
 ## 1.3.0
 
 - New version `1.1.0` of the five `stdio-box` credential boxes (`atlassian`, `notion`, `tavily`, `yandex-tracker`, `yandex-wiki`): built from `stdio-box` 0.3.0 (`ghcr.io/keystone-codes/stdio-box:0.3.0`). Adds `creds_desired_get`, `creds_desired_set`, and `creds_sync`; the latter two are `critical` and `requires_human_identity` in the package's `policy.example.yaml` — an API key or service account may not call them.
