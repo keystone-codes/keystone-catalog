@@ -6,13 +6,14 @@ packages:
     versions:
       - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.0.1, ref: v1.0.1, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.0.2, ref: v1.0.2, keystone_mcp: ">=0.5.0,<2.0"}
   minio:
     kind: resource
     provides: {kind: s3, version: 1}
     source: https://github.com/keystone-codes/minio-resource
     versions:
-      - {version: 1.0.0, ref: v1.0.0}
       - {version: 1.0.1, ref: v1.0.1}
+      - {version: 1.0.2, ref: v1.0.2}
   postgres:
     kind: resource
     provides: {kind: postgres, version: 1}
@@ -24,6 +25,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.0.1, ref: v1.0.1, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.0.2, ref: v1.0.2, keystone_mcp: ">=0.5.0,<2.0"}
   atlassian:
     summary: Jira and Confluence behind Keystone; each person, service or role uses its own account.
     source: https://github.com/keystone-codes/stdio-box
@@ -31,6 +33,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: atlassian/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.1.0, ref: atlassian/v1.1.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.1.1, ref: atlassian/v1.1.1, keystone_mcp: ">=0.5.0,<2.0"}
   notion:
     summary: Notion tools behind Keystone; each person, service or role uses its own account.
     source: https://github.com/keystone-codes/stdio-box
@@ -38,6 +41,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: notion/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.1.0, ref: notion/v1.1.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.1.1, ref: notion/v1.1.1, keystone_mcp: ">=0.5.0,<2.0"}
   tavily:
     summary: Tavily search tools (tavily-mcp 0.2.22) behind Keystone; each person, service or role uses its own API key.
     source: https://github.com/keystone-codes/stdio-box
@@ -45,6 +49,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: tavily/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.1.0, ref: tavily/v1.1.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.1.1, ref: tavily/v1.1.1, keystone_mcp: ">=0.5.0,<2.0"}
   yandex-tracker:
     summary: Yandex Tracker tools (@fractalizer/mcp-server-yandex-tracker 5.1.0) behind Keystone; each person, service or role uses its own account.
     source: https://github.com/keystone-codes/stdio-box
@@ -52,6 +57,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: yandex-tracker/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.1.0, ref: yandex-tracker/v1.1.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.1.1, ref: yandex-tracker/v1.1.1, keystone_mcp: ">=0.5.0,<2.0"}
   yandex-wiki:
     summary: Yandex Wiki tools (ya-wiki-mcp 0.3.1) behind Keystone; each person, service or role uses its own account.
     source: https://github.com/keystone-codes/stdio-box
@@ -59,6 +65,7 @@ packages:
     versions:
       - {version: 1.0.0, ref: yandex-wiki/v1.0.0, keystone_mcp: ">=0.5.0,<2.0"}
       - {version: 1.1.0, ref: yandex-wiki/v1.1.0, keystone_mcp: ">=0.5.0,<2.0"}
+      - {version: 1.1.1, ref: yandex-wiki/v1.1.1, keystone_mcp: ">=0.5.0,<2.0"}
 bundles:
   minimal:
     description: >-
