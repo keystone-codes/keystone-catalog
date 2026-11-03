@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1
+
+- `file-mcp` 1.0.3, `atlassian` 1.1.2 and `yandex-wiki` 1.1.2: `joserfc` 1.7.7 (GHSA-9pg5-8c7x-5hfx). The two boxes stay on `stdio-box` 0.3.1. No credential store migration.
+- Catalog tag `v1.4.1`.
+
 ## 1.4.0
 
 - `file-mcp` 1.0.2: `fastmcp` 4.1.4 and `authlib` 1.9.1 (security fixes); integration tests run in CI.
