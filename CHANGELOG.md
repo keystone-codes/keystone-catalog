@@ -1,8 +1,16 @@
 # Changelog
 
+## 1.4.2
+
+- `atlassian` and `yandex-wiki` 1.1.3 on `stdio-box` 0.3.2 (`ghcr.io/keystone-codes/stdio-box:0.3.2`): `joserfc` 1.7.7 (GHSA-9pg5-8c7x-5hfx) now reaches the running box.
+- `notion`, `tavily` and `yandex-tracker` 1.1.2: image 0.3.2 only.
+- No credential store migration.
+- Catalog tag `v1.4.2`.
+
 ## 1.4.1
 
-- `file-mcp` 1.0.3, `atlassian` 1.1.2 and `yandex-wiki` 1.1.2: `joserfc` 1.7.7 (GHSA-9pg5-8c7x-5hfx). The two boxes stay on `stdio-box` 0.3.1. No credential store migration.
+- `file-mcp` 1.0.3: `joserfc` 1.7.7 (GHSA-9pg5-8c7x-5hfx).
+- `atlassian` 1.1.2 and `yandex-wiki` 1.1.2 lock `joserfc` 1.7.7. On `stdio-box` 0.3.1 they still install 1.7.5, because the box takes package dependencies from the image. Use 1.1.3 from catalog 1.4.2.
 - Catalog tag `v1.4.1`.
 
 ## 1.4.0
