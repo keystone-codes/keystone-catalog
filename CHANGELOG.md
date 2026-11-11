@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.3
+
+- `file-mcp` 1.0.4: `apt` 2.6.2 in the image (CVE-2026-109518).
+- `atlassian` and `yandex-wiki` 1.1.4, `notion`, `tavily` and `yandex-tracker` 1.1.3 on `stdio-box` 0.3.3 (`ghcr.io/keystone-codes/stdio-box:0.3.3`): `apt` 2.6.2 in the box image (CVE-2026-109518). Image only; no dependency changes in packages.
+- No credential store migration.
+- Catalog tag `v1.4.3`.
+
 ## 1.4.2
 
 - `atlassian` and `yandex-wiki` 1.1.3 on `stdio-box` 0.3.2 (`ghcr.io/keystone-codes/stdio-box:0.3.2`): `joserfc` 1.7.7 (GHSA-9pg5-8c7x-5hfx) now reaches the running box.
